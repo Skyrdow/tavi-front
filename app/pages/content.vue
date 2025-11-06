@@ -1,8 +1,10 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import Chat from '~/assets/Chat.vue';
+</script>
 
 <template>
   <div class="grid grid-cols-2 m-4 p-1 bg-gray-300">
-    <div class="bg-green-100">chat</div>
+    <Chat/>
     <div class="w-md bg-white">
       <span class="flex items-center gap-2 m-1">
         <img class="size-12" src="/assets/account.svg" />
