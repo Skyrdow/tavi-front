@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed } from "vue";
 
 // Mocking the current date to November 2025 for demonstration
 const currentMonth = ref(10); // 0-indexed: November
@@ -25,7 +25,11 @@ const mockScheduledPosts: ScheduledPost[] = [
 const calendarDays = computed(() => {
   const date = new Date(currentYear.value, currentMonth.value, 1);
   const firstDayOfWeek = date.getDay(); // 0 for Sunday, 6 for Saturday
-  const daysInMonth = new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+  const daysInMonth = new Date(
+    currentYear.value,
+    currentMonth.value + 1,
+    0,
+  ).getDate();
 
   const days = [];
 
@@ -36,12 +40,12 @@ const calendarDays = computed(() => {
 
   // Add actual days
   for (let day = 1; day <= daysInMonth; day++) {
-    const monthPadded = String(currentMonth.value + 1).padStart(2, '0');
-    const dayPadded = String(day).padStart(2, '0');
+    const monthPadded = String(currentMonth.value + 1).padStart(2, "0");
+    const dayPadded = String(day).padStart(2, "0");
     const dateString = `${currentYear.value}-${monthPadded}-${dayPadded}`;
-    
-    let posts = mockScheduledPosts.filter(post => post.date === dateString);
-    
+
+    let posts = mockScheduledPosts.filter((post) => post.date === dateString);
+
     // Sort posts by time
     posts.sort((a, b) => a.time.localeCompare(b.time));
 
@@ -52,24 +56,43 @@ const calendarDays = computed(() => {
 });
 
 const monthName = computed(() => {
-  return new Date(currentYear.value, currentMonth.value).toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+  return new Date(currentYear.value, currentMonth.value).toLocaleString(
+    "es-ES",
+    { month: "long", year: "numeric" },
+  );
 });
 </script>
 
 <template>
   <div class="p-8 bg-gray-50 min-h-screen">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">Programación de Publicaciones</h1>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">
+      Programación de Publicaciones
+    </h1>
 
     <!-- Calendar Header -->
-    <div class="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-100">
+    <div
+      class="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-100"
+    >
       <!-- Navigation buttons are non-functional mocks for now -->
-      <button class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors">&lt;</button>
-      <h2 class="text-3xl font-extrabold capitalize text-gray-900">{{ monthName }}</h2>
-      <button class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors">&gt;</button>
+      <button
+        class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+      >
+        &lt;
+      </button>
+      <h2 class="text-3xl font-extrabold capitalize text-gray-900">
+        {{ monthName }}
+      </h2>
+      <button
+        class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
+      >
+        &gt;
+      </button>
     </div>
 
     <!-- Calendar Grid -->
-    <div class="grid grid-cols-7 gap-px border border-gray-200 rounded-xl bg-gray-200 shadow-2xl overflow-hidden">
+    <div
+      class="grid grid-cols-7 gap-px border border-gray-200 rounded-xl bg-gray-200 shadow-2xl overflow-hidden"
+    >
       <!-- Days of Week Headers -->
       <div
         v-for="day in daysOfWeek"
@@ -87,7 +110,11 @@ const monthName = computed(() => {
         :class="{ 'bg-gray-100 text-gray-400': day.day === null }"
       >
         <div v-if="day.day !== null" class="flex flex-col h-full">
-          <span class="text-lg font-bold mb-1 ml-1" :class="{ 'text-indigo-600': day.dateString === '2025-11-10' }">{{ day.day }}</span>
+          <span
+            class="text-lg font-bold mb-1 ml-1"
+            :class="{ 'text-indigo-600': day.dateString === '2025-11-10' }"
+            >{{ day.day }}</span
+          >
           <div class="flex-grow space-y-1 overflow-y-auto">
             <div
               v-for="post in day.posts"
@@ -100,8 +127,12 @@ const monthName = computed(() => {
                 class="size-8 object-cover rounded-md flex-shrink-0"
               />
               <div class="flex flex-col min-w-0 flex-1">
-                <span class="text-xs font-semibold text-indigo-800">{{ post.time }}</span>
-                <span class="text-xs text-indigo-600 truncate">Post #{{ post.id }}</span>
+                <span class="text-xs font-semibold text-indigo-800">{{
+                  post.time
+                }}</span>
+                <span class="text-xs text-indigo-600 truncate"
+                  >Post #{{ post.id }}</span
+                >
               </div>
             </div>
           </div>

@@ -1,10 +1,10 @@
 <script setup lang="ts">
 // Define navigation links
 const navLinks = [
-  { name: 'Inicio', to: '/' },
-  { name: 'Contenido', to: '/content' },
-  { name: 'Programación', to: '/programing' },
-  { name: 'Moderación', to: '/mod' },
+  { name: "Inicio", to: "/" },
+  { name: "Contenido", to: "/content" },
+  { name: "Programación", to: "/programing" },
+  { name: "Moderación", to: "/mod" },
 ];
 </script>
 
@@ -14,8 +14,14 @@ const navLinks = [
       <div class="flex justify-between items-center h-16">
         <!-- Logo/App Name -->
         <NuxtLink to="/" class="flex items-center">
-          <img src="/assets/gemini.svg" class="h-8 w-auto text-indigo-600" alt="Logo" />
-          <span class="ml-2 text-2xl font-extrabold text-indigo-600">Tavi AI</span>
+          <img
+            src="/assets/gemini.svg"
+            class="h-8 w-auto text-indigo-600"
+            alt="Logo"
+          />
+          <span class="ml-2 text-2xl font-extrabold text-indigo-600"
+            >Tavi AI</span
+          >
         </NuxtLink>
 
         <!-- Navigation Links -->
@@ -35,7 +41,9 @@ const navLinks = [
 
         <!-- User/Action Button (Mock) -->
         <div class="flex items-center">
-          <button class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-md">
+          <button
+            class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-md"
+          >
             Mi Cuenta
           </button>
         </div>
