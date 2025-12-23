@@ -1,4 +1,10 @@
 <script setup lang="ts">
+import { useAuth } from '~/composables/useAuth';
+import { useRouter } from 'vue-router';
+
+const { isAuthenticated, logout } = useAuth();
+const router = useRouter();
+
 // Define navigation links
 const navLinks = [
   { name: "Inicio", to: "/" },
@@ -6,6 +12,11 @@ const navLinks = [
   { name: "Programación", to: "/programing" },
   { name: "Moderación", to: "/mod" },
 ];
+
+const handleLogout = () => {
+  logout();
+  router.push('/login');
+};
 </script>
 
 <template>
@@ -39,13 +50,22 @@ const navLinks = [
           </div>
         </nav>
 
-        <!-- User/Action Button (Mock) -->
+        <!-- User/Action Button -->
         <div class="flex items-center">
           <button
+            v-if="isAuthenticated"
+            @click="handleLogout"
+            class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-md"
+          >
+            Cerrar Sesión
+          </button>
+          <NuxtLink
+            v-else
+            to="/login"
             class="bg-indigo-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-indigo-700 transition-colors shadow-md"
           >
-            Mi Cuenta
-          </button>
+            Iniciar Sesión
+          </NuxtLink>
         </div>
       </div>
     </div>

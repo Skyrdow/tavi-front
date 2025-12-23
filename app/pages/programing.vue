@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 
+definePageMeta({
+  middleware: 'auth'
+});
+
 // Mocking the current date to November 2025 for demonstration
 const currentMonth = ref(10); // 0-indexed: November
 const currentYear = ref(2025);

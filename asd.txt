@@ -1,0 +1,76 @@
+
+https://llm-cm-agent-backend.onrender.com
+
+Post api/v1/admin-register
+{
+    "names": "Vicente Renato",
+    "lastnames": "Mieres Sepulveda",
+    "rut": "21.082.122",
+    "dv": "8",
+    "email": “email@gmail.com"
+}
+{
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDg4NjNhNzYzMTM0NmQwNzQyNGQwNiIsImVtYWlsIjoic2FsdmFjaW9ubWVudGFsQGdtYWlsLmNvbSIsImV4cCNjQ0NzAzNH0.fOQrQFRYj-dbbQqjjrWVlGMnafD61tZVzKahzILrKps"
+    },
+    "message": "Registro exitoso",
+    "success": true
+}
+
+
+
+Post /api/v1/verification-response
+Authorization Bearer token (mismo obtenido en register ya que en este punto no se tiene una pass)
+{
+    "code": "ff16aa12"
+}
+{
+    "data": null,
+    "message": "Cuenta verificada correctamente",
+    "success": true
+}
+
+
+Post /api/v1/tenants
+Authorization Bearer token (mismo obtenido en register ya que en este punto no se tiene una pass)
+{
+  "name": "Barbería Chile",
+  "slug": "haitibarber",
+  "categoryID": "682e22e20349d607170be400"
+}
+{
+    "data": {
+        "id": "694887187631346d07424d08",
+        "name": "Barbería Chile a",
+        "description": "",
+        "status": "active",
+        "slug": "testing",
+        "categoryID": "682e22e20349d607170be400",
+        "adminID": "6948863a7631346d07424d06",
+        "createdAt": "2025-12-21T23:47:36.549Z",
+        "updatedAt": "2025-12-21T23:47:36.549Z",
+        "deletedAt": "1970-01-01T00:00:00Z"
+    },
+    "message": "Negocio creado correctamente",
+    "success": true
+}
+
+
+Recien en este punto se genera la contraseña y se puede hacer login
+
+Post /api/v1/login
+{
+    "username": "vicente.mieres",
+    "password": "9bc3f921"
+}
+{
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5NDg4NjNhNzYzMTM0NmQwNzQyQ0NzMzN30.c1lhLjQ7qh1p_TV-hYJjoRPSy0incDzigfCvNCPhkvM"
+    },
+    "message": "Inicio de sesión exitoso",
+    "success": true
+}
+
+
+Get /api/v1/comments/:tenantid
+hace get a los comentarios de un tenant en particular

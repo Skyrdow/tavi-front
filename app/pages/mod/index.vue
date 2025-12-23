@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
 
+definePageMeta({
+  middleware: 'auth'
+});
+
 interface Comment {
   id: number;
   user: string;
