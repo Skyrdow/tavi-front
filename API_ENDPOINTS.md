@@ -3,11 +3,13 @@
 This document lists all available endpoints in the llm-cm-agent-backend API, designed for frontend integration.
 
 ## Base URL
+
 The API runs on `https://llm-cm-agent-backend.onrender.com`.
 
 ## Endpoints
 
 ### 1. Ping (Health Check)
+
 - **Method:** GET
 - **Path:** `/api/v1/ping`
 - **Description:** Test endpoint to check if the server is running.
@@ -19,6 +21,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 2. Gemini Request
+
 - **Method:** POST
 - **Path:** `/api/v1/geminiRequest`
 - **Description:** Generate content using Google's Gemini AI.
@@ -49,12 +52,14 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 3. Instagram Login
+
 - **Method:** GET
 - **Path:** `/auth/instagram/login`
 - **Description:** Initiates Instagram OAuth login flow. Redirects to Instagram authorization page.
 - **Response:** Redirect to Instagram OAuth URL.
 
 ### 4. Instagram OAuth Callback
+
 - **Method:** GET
 - **Path:** `/auth/instagram/callback`
 - **Description:** Handles the OAuth callback from Instagram after user authorization.
@@ -74,6 +79,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 5. Instagram Publish
+
 - **Method:** POST
 - **Path:** `/api/v1/instagram/publish`
 - **Description:** Publishes an image to Instagram Business account.
@@ -99,9 +105,10 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
 - **Error Responses:**
   - Missing data: `{"error": "Faltan datos requeridos", "details": "error message"}`
   - Media creation failure: `{"error": "Fallo en creación de media", "details": "response body"}`
-   - Publishing failure: `{"error": "Fallo en publicación de media", "details": "response body"}`
+  - Publishing failure: `{"error": "Fallo en publicación de media", "details": "response body"}`
 
 ### 6. Admin Register
+
 - **Method:** POST
 - **Path:** `/api/v1/admin-register`
 - **Description:** Registers a new admin user.
@@ -127,6 +134,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 7. Verification Response
+
 - **Method:** POST
 - **Path:** `/api/v1/verification-response`
 - **Description:** Verifies the admin account using a code.
@@ -147,6 +155,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 8. Create Tenant
+
 - **Method:** POST
 - **Path:** `/api/v1/tenants`
 - **Description:** Creates a new tenant/business.
@@ -180,6 +189,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 9. Login
+
 - **Method:** POST
 - **Path:** `/api/v1/login`
 - **Description:** Logs in a user with username and password.
@@ -202,6 +212,7 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ### 10. Get Comments
+
 - **Method:** GET
 - **Path:** `/api/v1/comments/:tenantid`
 - **Description:** Retrieves comments for a specific tenant.
@@ -213,10 +224,12 @@ The API runs on `https://llm-cm-agent-backend.onrender.com`.
   ```
 
 ## Authentication
+
 - Instagram endpoints require OAuth flow to obtain `access_token` and `user_id`.
 - Gemini endpoint does not require authentication.
 
 ## Notes
+
 - All responses are in JSON format.
 - Error responses include appropriate HTTP status codes.
 - The server uses Gin framework and runs on port 8080.

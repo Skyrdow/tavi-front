@@ -1,14 +1,16 @@
 # Instrucciones para Implementar el Flujo de Login en Frontend
 
 ## Resumen del Flujo de Login en Backend
+
 El backend proporciona un endpoint POST `/api/v1/login` que espera un JSON con `username` y `password`. Si las credenciales son válidas, devuelve un token JWT.
 
 ### Endpoint: POST /api/v1/login
+
 - **Body esperado:**
   ```json
   {
     "username": "string",
-    "password": "string"  // mínimo 8 caracteres
+    "password": "string" // mínimo 8 caracteres
   }
   ```
 - **Respuesta exitosa:**
@@ -62,14 +64,14 @@ El backend proporciona un endpoint POST `/api/v1/login` que espera un JSON con `
 // Función de login
 async function login(username, password) {
   try {
-    const response = await fetch('/api/v1/login', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ username, password })
+    const response = await fetch("/api/v1/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password }),
     });
     const data = await response.json();
     if (data.success) {
-      localStorage.setItem('authToken', data.data.token);
+      localStorage.setItem("authToken", data.data.token);
       // Redirigir a dashboard
     } else {
       // Mostrar error
@@ -80,8 +82,8 @@ async function login(username, password) {
 }
 
 // Usar token en requests
-const token = localStorage.getItem('authToken');
-fetch('/api/v1/protected-route', {
-  headers: { 'Authorization': `Bearer ${token}` }
+const token = localStorage.getItem("authToken");
+fetch("/api/v1/protected-route", {
+  headers: { Authorization: `Bearer ${token}` },
 });
 ```

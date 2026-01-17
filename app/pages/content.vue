@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import Chat from "~/assets/Chat.vue";
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: "auth",
 });
 
 // Mock data for the scheduled post
@@ -29,10 +29,10 @@ const formattedDate = computed(() => {
 <template>
   <div class="flex flex-col gap-6 p-8 bg-gray-50 min-h-screen">
     <!-- Scheduled Date Card -->
-    <div class="p-6 bg-white rounded-xl shadow-lg border border-gray-100 max-w-md mx-auto">
-      <h3
-        class="font-bold text-xl mb-3 text-gray-800 flex items-center gap-2"
-      >
+    <div
+      class="p-6 bg-white rounded-xl shadow-lg border border-gray-100 max-w-md mx-auto"
+    >
+      <h3 class="font-bold text-xl mb-3 text-gray-800 flex items-center gap-2">
         <svg
           class="w-6 h-6 text-indigo-500"
           fill="none"
@@ -49,9 +49,7 @@ const formattedDate = computed(() => {
         </svg>
         Publicación Agendada
       </h3>
-      <p
-        class="text-2xl font-mono text-indigo-600 bg-indigo-50 p-3 rounded-lg"
-      >
+      <p class="text-2xl font-mono text-indigo-600 bg-indigo-50 p-3 rounded-lg">
         {{ formattedDate }}
       </p>
       <!-- Placeholder for scheduling control (e.g., a date picker) -->

@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 
 definePageMeta({
-  middleware: 'auth'
+  middleware: "auth",
 });
 
 // Mocking the current date to November 2025 for demonstration

@@ -1,33 +1,33 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useAuth } from '~/composables/useAuth';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useAuth } from "~/composables/useAuth";
+import { useRouter } from "vue-router";
 
 const { login } = useAuth();
 const router = useRouter();
 
-const username = ref('');
-const password = ref('');
-const error = ref('');
+const username = ref("");
+const password = ref("");
+const error = ref("");
 const loading = ref(false);
 
 const handleLogin = async () => {
   if (!username.value.trim()) {
-    error.value = 'El usuario es requerido';
+    error.value = "El usuario es requerido";
     return;
   }
   if (password.value.length < 8) {
-    error.value = 'La contraseña debe tener al menos 8 caracteres';
+    error.value = "La contraseña debe tener al menos 8 caracteres";
     return;
   }
   loading.value = true;
-  error.value = '';
+  error.value = "";
   const result = await login(username.value, password.value);
   loading.value = false;
   if (result.success) {
-    router.push('/content');
+    router.push("/content");
   } else {
-    error.value = result.message || 'Error desconocido';
+    error.value = result.message || "Error desconocido";
   }
 };
 </script>
@@ -78,13 +78,19 @@ const handleLogin = async () => {
             :disabled="loading"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
           >
-            <span v-if="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+            <span
+              v-if="loading"
+              class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+            ></span>
             <span v-else>Iniciar Sesión</span>
           </button>
         </div>
 
         <div class="text-center">
-          <router-link to="/register" class="text-indigo-600 hover:text-indigo-500">
+          <router-link
+            to="/register"
+            class="text-indigo-600 hover:text-indigo-500"
+          >
             ¿No tienes cuenta? Regístrate
           </router-link>
         </div>

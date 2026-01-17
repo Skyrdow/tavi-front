@@ -1,38 +1,42 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { useAuth } from '~/composables/useAuth';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useAuth } from "~/composables/useAuth";
+import { useRouter } from "vue-router";
 
-const { createTenant } = useAuth();
+const { token, createTenant } = useAuth();
 const router = useRouter();
 
 const form = ref({
-  name: '',
-  slug: '',
-  category: '',
+  name: "",
+  slug: "",
+  category: "",
+  businessInfo: "",
+  agentPrompt: "",
 });
-const error = ref('');
-const success = ref('');
+const error = ref("");
+const success = ref("");
 const loading = ref(false);
 
 const handleCreateTenant = async () => {
   loading.value = true;
-  error.value = '';
-  success.value = '';
-  const result = await createTenant(form.value);
+  error.value = "";
+  success.value = "";
+  const result = await createTenant(token.value?? "", form.value);
   loading.value = false;
   if (result.success) {
-    success.value = result.message || 'Negocio creado correctamente.';
+    success.value = result.message || "Negocio creado correctamente.";
     // Redirect to login after success
-    setTimeout(() => router.push('/login'), 2000);
+    setTimeout(() => router.push("/login"), 2000);
   } else {
-    error.value = result.message || 'Error desconocido';
+    error.value = result.message || "Error desconocido";
   }
 };
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div
+    class="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8"
+  >
     <div class="max-w-md w-full space-y-8">
       <div>
         <h2 class="mt-6 text-center text-3xl font-extrabold text-gray-900">
@@ -76,9 +80,33 @@ const handleCreateTenant = async () => {
               name="category"
               type="text"
               required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
               placeholder="Categoría"
             />
+          </div>
+          <div>
+            <label for="businessInfo" class="sr-only"
+              >Información del Negocio</label
+            >
+            <textarea
+              id="businessInfo"
+              v-model="form.businessInfo"
+              name="businessInfo"
+              rows="4"
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              placeholder="Información del Negocio"
+            ></textarea>
+          </div>
+          <div>
+            <label for="agentPrompt" class="sr-only">Agent Prompt</label>
+            <textarea
+              id="agentPrompt"
+              v-model="form.agentPrompt"
+              name="agentPrompt"
+              rows="4"
+              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+              placeholder="Agent Prompt"
+            ></textarea>
           </div>
         </div>
 
@@ -96,7 +124,10 @@ const handleCreateTenant = async () => {
             :disabled="loading"
             class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400"
           >
-            <span v-if="loading" class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></span>
+            <span
+              v-if="loading"
+              class="animate-spin rounded-full h-4 w-4 border-b-2 border-white"
+            ></span>
             <span v-else>Crear Negocio</span>
           </button>
         </div>

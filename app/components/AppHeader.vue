@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { useAuth } from '~/composables/useAuth';
-import { useRouter } from 'vue-router';
+import { useAuth } from "~/composables/useAuth";
+import { useRouter } from "vue-router";
 
 const { isAuthenticated, logout } = useAuth();
 const router = useRouter();
@@ -15,7 +15,7 @@ const navLinks = [
 
 const handleLogout = () => {
   logout();
-  router.push('/login');
+  router.push("/login");
 };
 </script>
 
