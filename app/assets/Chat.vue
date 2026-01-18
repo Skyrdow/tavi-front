@@ -1,10 +1,16 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref } from "vue";
 import { useApi } from "~/composables/useApi";
-import MediaUploader from "~/assets/MediaUploader.vue";
+
+interface Props {
+  currentDescription: string;
+}
+
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
   "file-uploaded": [file: File | null];
+  "description-update": [description: string];
 }>();
 
 const { geminiRequest } = useApi();
@@ -12,41 +18,45 @@ const { geminiRequest } = useApi();
 interface Message {
   texto: string;
   ai: boolean;
+  suggestedText?: string;
 }
 
 const mensajes = ref<Message[]>([
-  { texto: "Hola, soy tu asistente IA. ¿En qué puedo ayudarte?", ai: true },
+  {
+    texto:
+      "Hola, soy tu asistente IA. Puedo ayudarte a mejorar la descripción de tu publicación. ¿Qué cambios te gustaría hacer?",
+    ai: true,
+  },
 ]);
 
 const inputMessage = ref("");
 const isLoading = ref(false);
-const mediaFile = ref<File | null>(null);
 
-const handleFileUploaded = (file: File | null) => {
-  mediaFile.value = file;
-  emit("file-uploaded", file);
+const applySuggestion = (suggestedText: string) => {
+  emit("description-update", suggestedText);
+  mensajes.value.push({
+    texto: `Descripción actualizada: "${suggestedText}"`,
+    ai: true,
+  });
 };
-
-const mediaUrl = computed(() => {
-  if (mediaFile.value) {
-    return URL.createObjectURL(mediaFile.value);
-  }
-  return null;
-});
 
 const sendMessage = async () => {
   if (!inputMessage.value.trim() || isLoading.value) return;
 
   const userMessage: Message = { texto: inputMessage.value, ai: false };
   mensajes.value.push(userMessage);
-  const prompt = inputMessage.value;
+  const prompt = `Descripción actual: "${props.currentDescription}". Solicitud del usuario: ${inputMessage.value}. Por favor, proporciona una versión mejorada de la descripción basada en esta solicitud.`;
   inputMessage.value = "";
   isLoading.value = true;
 
   try {
     const response = await geminiRequest(prompt);
     if (response.success) {
-      const aiMessage: Message = { texto: response.data, ai: true };
+      const aiMessage: Message = {
+        texto: response.data,
+        ai: true,
+        suggestedText: response.data,
+      };
       mensajes.value.push(aiMessage);
     } else {
       const errorMessage: Message = {
@@ -69,38 +79,14 @@ const sendMessage = async () => {
 
 <template>
   <div
-    class="flex flex-col w-full bg-white rounded-xl shadow-lg border border-gray-100 h-full max-h-[600px]"
+    class="flex flex-col w-full bg-white rounded-xl shadow-lg border border-gray-100 h-full max-h-[500px]"
   >
     <!-- Chat Header -->
     <div class="p-4 border-b bg-indigo-50 rounded-t-xl">
-      <h3 class="font-bold text-xl text-indigo-800 flex items-center gap-2">
-        <img class="size-6" src="/assets/gemini.svg" alt="AI Icon" />
-        Asistente IA (Gemini)
+      <h3 class="font-bold text-lg text-indigo-800 flex items-center gap-2">
+        <img class="size-5" src="/assets/gemini.svg" alt="AI Icon" />
+        Asistente IA para Descripción
       </h3>
-    </div>
-
-    <!-- Media Uploader Section -->
-    <div class="p-4 border-b bg-gray-50">
-      <MediaUploader @file-uploaded="handleFileUploaded" />
-    </div>
-
-    <!-- Media Preview Section -->
-    <div v-if="mediaFile" class="p-4 border-b bg-white">
-      <div class="w-full max-w-sm mx-auto">
-        <div
-          class="aspect-square w-full bg-gray-200 flex items-center justify-center rounded-lg overflow-hidden"
-        >
-          <img
-            v-if="mediaUrl"
-            :src="mediaUrl"
-            alt="Post media preview"
-            class="object-cover w-full h-full"
-          />
-        </div>
-        <p class="text-center text-sm text-gray-600 mt-2">
-          Vista previa de la imagen
-        </p>
-      </div>
     </div>
 
     <!-- Messages Area -->
@@ -108,8 +94,8 @@ const sendMessage = async () => {
       <div
         v-for="(mensaje, index) in mensajes"
         :key="index"
-        class="flex"
-        :class="{ 'justify-end': !mensaje.ai, 'justify-start': mensaje.ai }"
+        class="flex flex-col"
+        :class="{ 'items-end': !mensaje.ai, 'items-start': mensaje.ai }"
       >
         <div
           class="max-w-[80%] p-3 rounded-xl shadow-md"
@@ -128,6 +114,13 @@ const sendMessage = async () => {
             {{ mensaje.ai ? "Gemini" : "Tú" }}
           </p>
           <p>{{ mensaje.texto }}</p>
+          <button
+            v-if="mensaje.ai && mensaje.suggestedText"
+            @click="applySuggestion(mensaje.suggestedText)"
+            class="mt-2 text-xs bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600 transition-colors"
+          >
+            Aplicar sugerencia
+          </button>
         </div>
       </div>
       <div v-if="isLoading" class="flex justify-start">
@@ -146,7 +139,7 @@ const sendMessage = async () => {
         <textarea
           v-model="inputMessage"
           @keyup.enter="sendMessage"
-          placeholder="Escribe tu mensaje al Asistente IA..."
+          placeholder="Describe cómo quieres modificar la descripción..."
           class="resize-none p-3 flex-1 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
           rows="2"
           :disabled="isLoading"
