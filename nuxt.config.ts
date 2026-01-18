@@ -9,6 +9,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
   },
   modules: [
+    "@pinia/nuxt",
     "@nuxt/eslint",
     "@nuxt/image",
     "@nuxt/scripts",

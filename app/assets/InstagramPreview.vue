@@ -137,7 +137,7 @@ const mediaUrl = computed(() => {
       <div v-else class="text-sm text-gray-500 italic">Sin descripción</div>
 
       <!-- Comments placeholder -->
-      <p class="text-xs text-gray-400 mt-2">Ver los 0 comentarios</p>
+      <p class="text-xs text-gray-400 mt-2">Ver comentarios</p>
     </div>
   </div>
 </template>

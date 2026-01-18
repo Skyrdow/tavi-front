@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://llm-cm-agent-backend.onrender.com";
+ const API_BASE_URL = "http://localhost:8080";
 
 export const useApi = () => {
   const adminRegister = async (data: {

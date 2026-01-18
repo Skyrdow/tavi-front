@@ -29,6 +29,10 @@ const fetchComments = async () => {
 
     if (response.success) {
       comments.value = response.data || [];
+      comments.value.sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
     } else {
       error.value = response.message || "Error al cargar comentarios";
     }

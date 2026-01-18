@@ -147,7 +147,7 @@ const sendMessage = async () => {
         <button
           @click="sendMessage"
           :disabled="!inputMessage.trim() || isLoading"
-          class="p-3 bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400"
+          class="p-3 bg-indigo-600 cursor-pointer rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400"
         >
           <img src="/assets/send.svg" class="size-6 invert" alt="Send" />
         </button>

@@ -88,7 +88,7 @@ const connectInstagram = async () => {
           <button
             v-if="isAuthenticated"
             @click="connectInstagram"
-            class="bg-gradient-to-r from-purple-500 to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-colors shadow-md flex items-center gap-2"
+            class="bg-gradient-to-r from-purple-500 cursor-pointer to-pink-500 text-white px-4 py-2 rounded-lg text-sm font-medium hover:from-purple-600 hover:to-pink-600 transition-colors shadow-md flex items-center gap-2"
           >
             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
               <path
@@ -100,7 +100,7 @@ const connectInstagram = async () => {
           <button
             v-if="isAuthenticated"
             @click="handleLogout"
-            class="bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-md"
+            class="bg-red-600 text-white px-4 py-2 cursor-pointer rounded-lg text-sm font-medium hover:bg-red-700 transition-colors shadow-md"
           >
             Cerrar Sesión
           </button>

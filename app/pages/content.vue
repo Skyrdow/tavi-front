@@ -3,22 +3,35 @@ import { ref, computed } from "vue";
 import InstagramPreview from "~/assets/InstagramPreview.vue";
 import MediaUploader from "~/assets/MediaUploader.vue";
 import Chat from "~/assets/Chat.vue";
+import { Calendar, DatePicker } from 'v-calendar';
+import 'v-calendar/style.css';
 
 definePageMeta({
   middleware: "auth",
 });
 
+const contentStore = useContentStore();
+
+const disabledDates = ref([{ end: new Date(), start: null }]);
+const selectedDate = ref(new Date());
+
 // Estado para la descripción
-const description = ref("");
-const mediaFile = ref<File | null>(null);
+const description = computed({
+  get: () => contentStore.description,
+  set: (value) => contentStore.description = value,
+});
+const mediaFile = computed(() => contentStore.mediaFile);
 
 // Estado para la fecha agendada
-const scheduledDate = ref<Date | null>(null);
+const scheduledDate = computed({
+  get: () => contentStore.scheduledDate,
+  set: (value) => contentStore.scheduledDate = value,
+});
 const isScheduling = ref(false);
-const selectedDate = ref("");
+// const selectedDate = ref("");
 
 const handleFileUploaded = (file: File | null) => {
-  mediaFile.value = file;
+  contentStore.setMediaFile(file);
 };
 
 const handleDescriptionUpdate = (newDescription: string) => {
@@ -43,14 +56,14 @@ const confirmSchedule = () => {
   if (selectedDate.value) {
     scheduledDate.value = new Date(selectedDate.value);
     isScheduling.value = false;
-    selectedDate.value = "";
+    selectedDate.value = new Date();
     alert("Publicación programada para: " + formattedDate.value);
   }
 };
 
 const cancelSchedule = () => {
   isScheduling.value = false;
-  selectedDate.value = "";
+  selectedDate.value = new Date();
 };
 
 const formattedDate = computed(() => {
@@ -193,12 +206,17 @@ const formattedDate = computed(() => {
           <h3 class="font-bold text-lg mb-4 text-gray-800 pr-8">
             Seleccionar fecha de publicación
           </h3>
-          <input
+          <!-- <input
             type="date"
             v-model="selectedDate"
             :min="new Date(Date.now() + 86400000).toISOString().split('T')[0]"
             class="w-full p-3 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500"
-          />
+          /> -->
+
+          <div class="flex items-center justify-center">
+            <DatePicker :disabled-dates="disabledDates" v-model="selectedDate" mode="dateTime" is24hr/>
+          </div>
+
           <div class="flex gap-2 mt-4">
             <button
               @click="confirmSchedule"
