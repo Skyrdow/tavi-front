@@ -5,14 +5,18 @@ import MediaUploader from "~/assets/MediaUploader.vue";
 import Chat from "~/assets/Chat.vue";
 import { Calendar, DatePicker } from 'v-calendar';
 import 'v-calendar/style.css';
+import { useApi } from "~/composables/useApi";
+import { useAuth } from "~/composables/useAuth";
 
 definePageMeta({
   middleware: "auth",
 });
 
 const contentStore = useContentStore();
+const { scheduleJob } = useApi();
+const { token } = useAuth();
 
-const disabledDates = ref([{ end: new Date(), start: null }]);
+const disabledDates = ref([{ end: new Date(Date.now() - 24 * 60 * 60 * 1000), start: null }]);
 const selectedDate = ref(new Date());
 
 // Estado para la descripción
@@ -52,12 +56,22 @@ const startScheduling = () => {
   isScheduling.value = true;
 };
 
-const confirmSchedule = () => {
-  if (selectedDate.value) {
-    scheduledDate.value = new Date(selectedDate.value);
-    isScheduling.value = false;
-    selectedDate.value = new Date();
-    alert("Publicación programada para: " + formattedDate.value);
+const confirmSchedule = async () => {
+  if (selectedDate.value && token.value) {
+    try {
+      const data = {
+        description: description.value,
+        media: contentStore.mediaFileData,
+      };
+      const scheduledAt = selectedDate.value.toISOString();
+      await scheduleJob(token.value, "publishPost", data, scheduledAt);
+      scheduledDate.value = new Date(selectedDate.value);
+      isScheduling.value = false;
+      selectedDate.value = new Date();
+      alert("Publicación programada para: " + formattedDate.value);
+    } catch (e) {
+      alert("Error al programar la publicación");
+    }
   }
 };
 

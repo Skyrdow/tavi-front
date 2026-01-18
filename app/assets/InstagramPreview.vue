@@ -132,7 +132,7 @@ const mediaUrl = computed(() => {
       <!-- Caption -->
       <div v-if="description" class="text-sm">
         <span class="font-semibold">Tu Perfil</span>
-        <span class="ml-2">{{ description }}</span>
+        <span class="ml-2 whitespace-pre-line">{{ description }}</span>
       </div>
       <div v-else class="text-sm text-gray-500 italic">Sin descripción</div>
 
