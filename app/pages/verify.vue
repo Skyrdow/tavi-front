@@ -21,7 +21,7 @@ const handleVerify = async () => {
   loading.value = true;
   error.value = "";
   success.value = "";
-  const result = await verify(token.value?? "", code.value);
+  const result = await verify(token.value ?? "", code.value);
   loading.value = false;
   if (result.success) {
     success.value = result.message || "Cuenta verificada correctamente.";

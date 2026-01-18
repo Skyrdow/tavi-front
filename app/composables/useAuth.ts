@@ -128,13 +128,16 @@ const verify = async (token: string, code: string) => {
   }
 };
 
-const createTenant = async (token: string, data: {
-  name: string;
-  slug: string;
-  category: string;
-  businessInfo: string;
-  agentPrompt: string;
-}) => {
+const createTenant = async (
+  token: string,
+  data: {
+    name: string;
+    slug: string;
+    category: string;
+    businessInfo: string;
+    agentPrompt: string;
+  },
+) => {
   try {
     const response = (await apiCreateTenant(token, data)) as any;
     if (response.success) {

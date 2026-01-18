@@ -21,7 +21,7 @@ const handleCreateTenant = async () => {
   loading.value = true;
   error.value = "";
   success.value = "";
-  const result = await createTenant(token.value?? "", form.value);
+  const result = await createTenant(token.value ?? "", form.value);
   loading.value = false;
   if (result.success) {
     success.value = result.message || "Negocio creado correctamente.";
