@@ -13,8 +13,8 @@ definePageMeta({
 });
 
 const contentStore = useContentStore();
-const { scheduleJob } = useApi();
-const { token } = useAuth();
+const { scheduleJob, generateDescription } = useApi();
+const { token, tenantId } = useAuth();
 
 const disabledDates = ref([{ end: new Date(Date.now() - 24 * 60 * 60 * 1000), start: null }]);
 const selectedDate = ref(new Date());
@@ -24,7 +24,10 @@ const description = computed({
   get: () => contentStore.description,
   set: (value) => contentStore.description = value,
 });
-const mediaFile = computed(() => contentStore.mediaFile);
+const mediaUrl = computed({
+  get: () => contentStore.mediaUrl,
+  set: (value) => contentStore.setMediaUrl(value),
+});
 
 // Estado para la fecha agendada
 const scheduledDate = computed({
@@ -34,17 +37,34 @@ const scheduledDate = computed({
 const isScheduling = ref(false);
 // const selectedDate = ref("");
 
-const handleFileUploaded = (file: File | null) => {
-  contentStore.setMediaFile(file);
+const handleUrlChanged = (url: string | null) => {
+  contentStore.setMediaUrl(url);
 };
 
 const handleDescriptionUpdate = (newDescription: string) => {
   description.value = newDescription;
 };
 
+const generateAIDescription = async () => {
+  if (!contentStore.mediaUrl || !tenantId.value) {
+    alert("Por favor, ingresa una URL de imagen y asegúrate de estar autenticado.");
+    return;
+  }
+  try {
+    const response = await generateDescription(tenantId.value, contentStore.mediaUrl);
+    if (response.success) {
+      description.value = response.data;
+    } else {
+      alert("Error generando descripción: " + response.message);
+    }
+  } catch (e) {
+    alert("Error de conexión al generar descripción.");
+  }
+};
+
 const publishNow = () => {
-  if (!mediaFile.value) {
-    alert("Por favor, sube un archivo multimedia antes de publicar.");
+  if (!mediaUrl.value) {
+    alert("Por favor, ingresa una URL de imagen antes de publicar.");
     return;
   }
   // Simular publicación inmediata
@@ -61,7 +81,7 @@ const confirmSchedule = async () => {
     try {
       const data = {
         description: description.value,
-        media: contentStore.mediaFileData,
+        media: contentStore.mediaUrl,
       };
       const scheduledAt = selectedDate.value.toISOString();
       await scheduleJob(token.value, "publishPost", data, scheduledAt);
@@ -101,10 +121,10 @@ const formattedDate = computed(() => {
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
       <!-- Columna izquierda: Controles -->
       <div class="space-y-6">
-        <!-- Subida de multimedia -->
+        <!-- URL de multimedia -->
         <div>
-          <h2 class="text-lg font-semibold mb-4">Subir contenido multimedia</h2>
-          <MediaUploader @file-uploaded="handleFileUploaded" />
+          <h2 class="text-lg font-semibold mb-4">URL de la imagen</h2>
+          <MediaUploader v-model="mediaUrl" />
         </div>
 
         <!-- Descripción -->
@@ -112,6 +132,12 @@ const formattedDate = computed(() => {
           <h2 class="text-lg font-semibold mb-4">
             Descripción de la publicación
           </h2>
+          <button
+            @click="generateAIDescription"
+            class="mb-4 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+          >
+            Generar descripción con IA
+          </button>
           <textarea
             v-model="description"
             placeholder="Escribe la descripción de tu publicación..."
@@ -126,7 +152,6 @@ const formattedDate = computed(() => {
             Asistente IA para modificar descripción
           </h2>
           <Chat
-            @file-uploaded="handleFileUploaded"
             @description-update="handleDescriptionUpdate"
             :current-description="description"
           />
@@ -136,7 +161,7 @@ const formattedDate = computed(() => {
       <!-- Columna derecha: Vista previa -->
       <div class="space-y-6">
         <h2 class="text-lg font-semibold">Vista previa de la publicación</h2>
-        <InstagramPreview :media-file="mediaFile" :description="description" />
+        <InstagramPreview :media-url="mediaUrl" :description="description" />
       </div>
     </div>
 

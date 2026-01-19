@@ -1,19 +1,10 @@
 <script setup lang="ts">
-import { computed } from "vue";
-
 interface Props {
-  mediaFile: File | null;
+  mediaUrl: string | null;
   description: string;
 }
 
 const props = defineProps<Props>();
-
-const mediaUrl = computed(() => {
-  if (props.mediaFile) {
-    return URL.createObjectURL(props.mediaFile);
-  }
-  return null;
-});
 </script>
 
 <template>
@@ -55,9 +46,9 @@ const mediaUrl = computed(() => {
     </div>
 
     <!-- Media -->
-    <div v-if="mediaUrl" class="aspect-square bg-gray-200">
+    <div v-if="props.mediaUrl" class="aspect-square bg-gray-200">
       <img
-        :src="mediaUrl"
+        :src="props.mediaUrl"
         alt="Post media"
         class="object-cover w-full h-full"
       />

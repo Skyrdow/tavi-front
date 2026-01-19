@@ -88,6 +88,29 @@ export const useApi = () => {
     });
   };
 
+  const scheduleJob = async (token: string, action: string, data: any, scheduledAt: string) => {
+    return await $fetch("/api/v1/jobs/", {
+      baseURL: API_BASE_URL,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: {
+        "action": action,
+        "data": data,
+        "scheduledAt": scheduledAt,
+      },
+    });
+  };
+
+  const generateDescription = async (tenantId: string, imageUrl: string) => {
+    return await $fetch("/api/v1/generate-description", {
+      baseURL: API_BASE_URL,
+      method: "POST",
+      body: { tenantId: tenantId, imageUrl: imageUrl },
+    });
+  };
+
   return {
     adminRegister,
     verificationResponse,
@@ -96,5 +119,7 @@ export const useApi = () => {
     getUser,
     getComments,
     geminiRequest,
+    scheduleJob,
+    generateDescription,
   };
 };
