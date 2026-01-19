@@ -25,7 +25,7 @@ const selectedDate = ref(new Date());
 // Estado para la descripción
 const description = computed({
   get: () => contentStore.description,
-  set: (value) => (contentStore.description = value),
+  set: (value) => (contentStore.description = value.substring(0, 2200)),
 });
 const mediaUrl = computed({
   get: () => contentStore.mediaUrl,
