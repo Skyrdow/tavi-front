@@ -1,4 +1,4 @@
- const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "https://llm-cm-agent-backend.onrender.com";
 
 export const useApi = () => {
   const adminRegister = async (data: {
@@ -88,7 +88,12 @@ export const useApi = () => {
     });
   };
 
-  const scheduleJob = async (token: string, action: string, data: any, scheduledAt: string) => {
+  const scheduleJob = async (
+    token: string,
+    action: string,
+    data: any,
+    scheduledAt: string,
+  ) => {
     return await $fetch("/api/v1/jobs/", {
       baseURL: API_BASE_URL,
       method: "POST",
@@ -96,9 +101,9 @@ export const useApi = () => {
         Authorization: `Bearer ${token}`,
       },
       body: {
-        "action": action,
-        "data": data,
-        "scheduledAt": scheduledAt,
+        action: action,
+        data: data,
+        scheduledAt: scheduledAt,
       },
     });
   };
@@ -108,6 +113,24 @@ export const useApi = () => {
       baseURL: API_BASE_URL,
       method: "POST",
       body: { tenantId: tenantId, imageUrl: imageUrl },
+    });
+  };
+
+  const createPost = async (
+    token: string,
+    data: {
+      title?: string;
+      content: string;
+      imageURL?: string;
+    },
+  ) => {
+    return await $fetch("/api/v1/posts/", {
+      baseURL: API_BASE_URL,
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: data,
     });
   };
 
@@ -121,5 +144,6 @@ export const useApi = () => {
     geminiRequest,
     scheduleJob,
     generateDescription,
+    createPost,
   };
 };

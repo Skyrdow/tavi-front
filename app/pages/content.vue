@@ -3,26 +3,29 @@ import { ref, computed } from "vue";
 import InstagramPreview from "~/assets/InstagramPreview.vue";
 import MediaUploader from "~/assets/MediaUploader.vue";
 import Chat from "~/assets/Chat.vue";
-import { Calendar, DatePicker } from 'v-calendar';
-import 'v-calendar/style.css';
+import { Calendar, DatePicker } from "v-calendar";
+import "v-calendar/style.css";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
+import { useContentStore } from "~/stores/content";
 
 definePageMeta({
   middleware: "auth",
 });
 
 const contentStore = useContentStore();
-const { scheduleJob, generateDescription } = useApi();
+const { createPost, scheduleJob, generateDescription } = useApi();
 const { token, tenantId } = useAuth();
 
-const disabledDates = ref([{ end: new Date(Date.now() - 24 * 60 * 60 * 1000), start: null }]);
+const disabledDates = ref([
+  { end: new Date(Date.now() - 24 * 60 * 60 * 1000), start: null },
+]);
 const selectedDate = ref(new Date());
 
 // Estado para la descripción
 const description = computed({
   get: () => contentStore.description,
-  set: (value) => contentStore.description = value,
+  set: (value) => (contentStore.description = value),
 });
 const mediaUrl = computed({
   get: () => contentStore.mediaUrl,
@@ -32,7 +35,7 @@ const mediaUrl = computed({
 // Estado para la fecha agendada
 const scheduledDate = computed({
   get: () => contentStore.scheduledDate,
-  set: (value) => contentStore.scheduledDate = value,
+  set: (value) => (contentStore.scheduledDate = value),
 });
 const isScheduling = ref(false);
 // const selectedDate = ref("");
@@ -47,29 +50,84 @@ const handleDescriptionUpdate = (newDescription: string) => {
 
 const generateAIDescription = async () => {
   if (!contentStore.mediaUrl || !tenantId.value) {
-    alert("Por favor, ingresa una URL de imagen y asegúrate de estar autenticado.");
+    alert(
+      "Por favor, ingresa una URL de imagen y asegúrate de estar autenticado.",
+    );
     return;
   }
   try {
-    const response = await generateDescription(tenantId.value, contentStore.mediaUrl);
+    const response = await generateDescription(
+      tenantId.value,
+      contentStore.mediaUrl,
+    );
     if (response.success) {
       description.value = response.data;
     } else {
       alert("Error generando descripción: " + response.message);
     }
   } catch (e) {
+    console.error("Error:", e);
     alert("Error de conexión al generar descripción.");
   }
 };
 
-const publishNow = () => {
+const publishNow = async () => {
   if (!mediaUrl.value) {
     alert("Por favor, ingresa una URL de imagen antes de publicar.");
     return;
   }
-  // Simular publicación inmediata
-  alert("¡Publicación realizada exitosamente!");
-  // Aquí iría la lógica real para publicar
+  if (!description.value.trim()) {
+    alert("Por favor, ingresa una descripción antes de publicar.");
+    return;
+  }
+  if (!token.value) {
+    alert("Token de autenticación no encontrado.");
+    return;
+  }
+
+  try {
+    // 1. Crear el post
+    const postData = {
+      title:"Title "+Date.now(),
+      content: description.value.trim(),
+      imageURL: mediaUrl.value,
+    };
+
+    const postResponse = await createPost(token.value, postData);
+
+    if (!postResponse?.success || !postResponse?.data?.id) {
+      alert(
+        "Error al crear el post: " +
+          (postResponse?.message || "Error desconocido"),
+      );
+      return;
+    }
+
+    // 2. Programar el job para publicar inmediatamente (hora actual)
+    const scheduledAt = new Date().toISOString();
+
+    const jobResponse = await scheduleJob(
+      token.value,
+      "publishPost",
+      { postId: postResponse.data.id },
+      scheduledAt,
+    );
+
+    if (jobResponse?.success) {
+      alert("¡Publicación realizada exitosamente!");
+      // Limpiar los campos después de publicar
+      description.value = "";
+      contentStore.setMediaUrl(null);
+    } else {
+      alert(
+        "Error al programar la publicación: " +
+          (jobResponse?.message || "Error desconocido"),
+      );
+    }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error de conexión al publicar");
+  }
 };
 
 const startScheduling = () => {
@@ -77,21 +135,68 @@ const startScheduling = () => {
 };
 
 const confirmSchedule = async () => {
-  if (selectedDate.value && token.value) {
-    try {
-      const data = {
-        description: description.value,
-        media: contentStore.mediaUrl,
-      };
-      const scheduledAt = selectedDate.value.toISOString();
-      await scheduleJob(token.value, "publishPost", data, scheduledAt);
+  if (!selectedDate.value) {
+    alert("Por favor, selecciona una fecha y hora.");
+    return;
+  }
+  if (!description.value.trim()) {
+    alert("Por favor, ingresa una descripción antes de programar.");
+    return;
+  }
+  if (!mediaUrl.value) {
+    alert("Por favor, ingresa una URL de imagen antes de programar.");
+    return;
+  }
+  if (!token.value) {
+    alert("Token de autenticación no encontrado.");
+    return;
+  }
+
+  try {
+    // 1. Crear el post
+    const postData = {
+      title:"Title "+Date.now(),
+      content: description.value.trim(),
+      imageURL: mediaUrl.value,
+    };
+
+    const postResponse = await createPost(token.value, postData);
+
+    if (!postResponse?.success || !postResponse?.data?.id) {
+      alert(
+        "Error al crear el post: " +
+          (postResponse?.message || "Error desconocido"),
+      );
+      return;
+    }
+
+    // 2. Programar el job para la fecha seleccionada
+    const scheduledAt = selectedDate.value.toISOString();
+
+    const jobResponse = await scheduleJob(
+      token.value,
+      "publishPost",
+      { postId: postResponse.data.id },
+      scheduledAt,
+    );
+
+    if (jobResponse?.success) {
       scheduledDate.value = new Date(selectedDate.value);
       isScheduling.value = false;
       selectedDate.value = new Date();
       alert("Publicación programada para: " + formattedDate.value);
-    } catch (e) {
-      alert("Error al programar la publicación");
+      // Limpiar los campos después de programar
+      description.value = "";
+      contentStore.setMediaUrl(null);
+    } else {
+      alert(
+        "Error al programar la publicación: " +
+          (jobResponse?.message || "Error desconocido"),
+      );
     }
+  } catch (error) {
+    console.error("Error:", error);
+    alert("Error de conexión al programar publicación");
   }
 };
 
@@ -253,7 +358,12 @@ const formattedDate = computed(() => {
           /> -->
 
           <div class="flex items-center justify-center">
-            <DatePicker :disabled-dates="disabledDates" v-model="selectedDate" mode="dateTime" is24hr/>
+            <DatePicker
+              :disabled-dates="disabledDates"
+              v-model="selectedDate"
+              mode="dateTime"
+              is24hr
+            />
           </div>
 
           <div class="flex gap-2 mt-4">
