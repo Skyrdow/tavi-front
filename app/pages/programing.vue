@@ -1,30 +1,86 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, onMounted, watch } from "vue";
+import { useApi } from "~/composables/useApi";
+import { useAuth } from "~/composables/useAuth";
+import JobCard from "~/components/JobCard.vue";
 
 definePageMeta({
   middleware: "auth",
 });
 
-// Mocking the current date to November 2025 for demonstration
-const currentMonth = ref(10); // 0-indexed: November
-const currentYear = ref(2025);
+const { getJobsByTenantId } = useApi();
+const { token } = useAuth();
+
+const now = new Date();
+const currentMonth = ref(now.getMonth());
+const currentYear = ref(now.getFullYear());
 
 const daysOfWeek = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
-interface ScheduledPost {
-  id: number;
+interface Job {
+  id: string;
   date: string; // YYYY-MM-DD
   time: string; // HH:MM (24h format)
-  thumbnailUrl: string;
+  action: string;
+  status: string;
+  data: any;
 }
 
-const mockScheduledPosts: ScheduledPost[] = [
-  { id: 1, date: "2025-11-15", time: "10:00", thumbnailUrl: "/account.svg" },
-  { id: 2, date: "2025-11-18", time: "14:30", thumbnailUrl: "/account.svg" },
-  { id: 3, date: "2025-11-25", time: "09:00", thumbnailUrl: "/account.svg" },
-  { id: 4, date: "2025-11-15", time: "18:00", thumbnailUrl: "/account.svg" }, // Multiple posts on the same day
-  { id: 5, date: "2025-11-15", time: "12:00", thumbnailUrl: "/account.svg" }, // Multiple posts on the same day
-];
+const jobs = ref<Job[]>([]);
+
+const loadJobs = async () => {
+  try {
+    console.log("loadJobs called, token:", token.value);
+    if (!token.value) {
+      console.log("No token available");
+      return;
+    }
+    const response = await getJobsByTenantId(token.value);
+    console.log("Jobs response:", response);
+    jobs.value = response.data.map((job: any) => {
+      const scheduledAt = new Date(job.scheduledAt);
+      const date = scheduledAt.toISOString().split('T')[0];
+      const time = scheduledAt.toTimeString().slice(0, 5);
+      return {
+        id: job.id,
+        date,
+        time,
+        action: job.action,
+        status: job.status,
+        data: job.data,
+      };
+    });
+    console.log("Jobs loaded:", jobs.value);
+  } catch (error) {
+    console.error("Error loading jobs:", error);
+  }
+};
+
+const nextMonth = () => {
+  if (currentMonth.value === 11) {
+    currentMonth.value = 0;
+    currentYear.value++;
+  } else {
+    currentMonth.value++;
+  }
+};
+
+const prevMonth = () => {
+  if (currentMonth.value === 0) {
+    currentMonth.value = 11;
+    currentYear.value--;
+  } else {
+    currentMonth.value--;
+  }
+};
+
+onMounted(() => {
+  if (token.value) loadJobs();
+});
+
+watch(token, (newToken) => {
+  if (newToken) loadJobs();
+});
 
 const calendarDays = computed(() => {
   const date = new Date(currentYear.value, currentMonth.value, 1);
@@ -39,7 +95,7 @@ const calendarDays = computed(() => {
 
   // Add leading empty days
   for (let i = 0; i < firstDayOfWeek; i++) {
-    days.push({ day: null, dateString: null, posts: [] });
+    days.push({ day: null, dateString: null, jobs: [] });
   }
 
   // Add actual days
@@ -48,12 +104,12 @@ const calendarDays = computed(() => {
     const dayPadded = String(day).padStart(2, "0");
     const dateString = `${currentYear.value}-${monthPadded}-${dayPadded}`;
 
-    let posts = mockScheduledPosts.filter((post) => post.date === dateString);
+    let jobsForDay = jobs.value.filter((job) => job.date === dateString);
 
-    // Sort posts by time
-    posts.sort((a, b) => a.time.localeCompare(b.time));
+    // Sort jobs by time
+    jobsForDay.sort((a, b) => a.time.localeCompare(b.time));
 
-    days.push({ day, dateString, posts });
+    days.push({ day, dateString, jobs: jobsForDay });
   }
 
   return days;
@@ -70,15 +126,15 @@ const monthName = computed(() => {
 <template>
   <div class="p-8 bg-gray-50 min-h-screen">
     <h1 class="text-3xl font-bold mb-6 text-gray-800">
-      Programación de Publicaciones
+      Programación de Jobs
     </h1>
 
     <!-- Calendar Header -->
     <div
       class="flex justify-between items-center mb-6 p-4 bg-white rounded-xl shadow-lg border border-gray-100"
     >
-      <!-- Navigation buttons are non-functional mocks for now -->
       <button
+        @click="prevMonth"
         class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
       >
         &lt;
@@ -87,6 +143,7 @@ const monthName = computed(() => {
         {{ monthName }}
       </h2>
       <button
+        @click="nextMonth"
         class="text-2xl font-semibold text-indigo-500 hover:text-indigo-700 transition-colors"
       >
         &gt;
@@ -119,27 +176,13 @@ const monthName = computed(() => {
             :class="{ 'text-indigo-600': day.dateString === '2025-11-10' }"
             >{{ day.day }}</span
           >
-          <div class="flex-grow space-y-1 overflow-y-auto">
-            <div
-              v-for="post in day.posts"
-              :key="post.id"
-              class="flex items-center gap-2 p-1 bg-indigo-50 rounded-lg cursor-pointer border border-indigo-300 hover:border-indigo-500 hover:shadow-md transition-all"
-            >
-              <img
-                :src="post.thumbnailUrl"
-                alt="Post thumbnail"
-                class="size-8 object-cover rounded-md flex-shrink-0"
-              />
-              <div class="flex flex-col min-w-0 flex-1">
-                <span class="text-xs font-semibold text-indigo-800">{{
-                  post.time
-                }}</span>
-                <span class="text-xs text-indigo-600 truncate"
-                  >Post #{{ post.id }}</span
-                >
-              </div>
-            </div>
-          </div>
+           <div class="grow space-y-1 overflow-y-auto">
+             <JobCard
+               v-for="job in day.jobs"
+               :key="job.id"
+               :job="job"
+             />
+           </div>
         </div>
       </div>
     </div>

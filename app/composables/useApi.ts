@@ -108,6 +108,16 @@ export const useApi = () => {
     });
   };
 
+  const getJobsByTenantId = async (token: string) => {
+    return await $fetch("/api/v1/jobs/", {
+      baseURL: API_BASE_URL,
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   const generateDescription = async (tenantId: string, imageUrl: string) => {
     return await $fetch("/api/v1/generate-description", {
       baseURL: API_BASE_URL,
@@ -143,6 +153,7 @@ export const useApi = () => {
     getComments,
     geminiRequest,
     scheduleJob,
+    getJobsByTenantId,
     generateDescription,
     createPost,
   };
