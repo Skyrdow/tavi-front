@@ -8,6 +8,8 @@ import "v-calendar/style.css";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
 import { useContentStore } from "~/stores/content";
+import { toast } from 'vue3-toastify';
+import 'vue3-toastify/dist/index.css';
 
 definePageMeta({
   middleware: "auth",
@@ -51,9 +53,12 @@ const handleDescriptionUpdate = (newDescription: string) => {
 
 const generateAIDescription = async () => {
   if (!contentStore.mediaUrl || !tenantId.value) {
-    alert(
+    toast.warn(
       "Por favor, ingresa una URL de imagen y asegúrate de estar autenticado.",
     );
+    // alert(
+    //   "Por favor, ingresa una URL de imagen y asegúrate de estar autenticado.",
+    // );
     return;
   }
   try {
@@ -64,26 +69,31 @@ const generateAIDescription = async () => {
     if (response.success) {
       description.value = response.data;
     } else {
-      alert("Error generando descripción: " + response.message);
+      toast.error("Error generando descripción: " + response.message);
+      // alert("Error generando descripción: " + response.message);
     }
   } catch (e) {
     console.error("Error:", e);
-    alert("Error de conexión al generar descripción.");
+    toast.error("Error de conexión al generar descripción.");
+    // alert("Error de conexión al generar descripción.");
   }
 };
 
 const publishNow = async () => {
   if (isProcessing.value) return;
   if (!mediaUrl.value) {
-    alert("Por favor, ingresa una URL de imagen antes de publicar.");
+    // alert("Por favor, ingresa una URL de imagen antes de publicar.");
+    toast.warn("Por favor, ingresa una URL de imagen antes de publicar.");
     return;
   }
   if (!description.value.trim()) {
-    alert("Por favor, ingresa una descripción antes de publicar.");
+    toast.warn("Por favor, ingresa una descripción antes de publicar.");
+    // alert("Por favor, ingresa una descripción antes de publicar.");
     return;
   }
   if (!token.value) {
-    alert("Token de autenticación no encontrado.");
+    toast.error("Token de autenticación no encontrado.");
+    // alert("Token de autenticación no encontrado.");
     return;
   }
 
@@ -99,10 +109,14 @@ const publishNow = async () => {
     const postResponse = await createPost(token.value, postData);
 
     if (!postResponse?.success || !postResponse?.data?.id) {
-      alert(
+      toast.error(
         "Error al crear el post: " +
           (postResponse?.message || "Error desconocido"),
       );
+      // alert(
+      //   "Error al crear el post: " +
+      //     (postResponse?.message || "Error desconocido"),
+      // );
       return;
     }
 
@@ -118,19 +132,25 @@ const publishNow = async () => {
     );
 
     if (jobResponse?.success) {
-      alert("¡Publicación realizada exitosamente!");
+      toast.success("¡Publicación realizada exitosamente!");
+      // alert("¡Publicación realizada exitosamente!");
       // Limpiar los campos después de publicar
       description.value = "";
       contentStore.setMediaUrl(null);
     } else {
-      alert(
+      toast.error(
         "Error al programar la publicación: " +
           (jobResponse?.message || "Error desconocido"),
       );
+      // alert(
+      //   "Error al programar la publicación: " +
+      //     (jobResponse?.message || "Error desconocido"),
+      // );
     }
   } catch (error) {
+    toast.error("Error de conexión al publicar.");
     console.error("Error:", error);
-    alert("Error de conexión al publicar");
+    // alert("Error de conexión al publicar");
   } finally {
     isProcessing.value = false;
   }
@@ -143,19 +163,23 @@ const startScheduling = () => {
 const confirmSchedule = async () => {
   if (isProcessing.value) return;
   if (!selectedDate.value) {
-    alert("Por favor, selecciona una fecha y hora.");
+    toast.warn("Por favor, selecciona una fecha y hora.");
+    // alert("Por favor, selecciona una fecha y hora.");
     return;
   }
   if (!description.value.trim()) {
-    alert("Por favor, ingresa una descripción antes de programar.");
+    toast.warn("Por favor, ingresa una descripción antes de programar.");
+    // alert("Por favor, ingresa una descripción antes de programar.");
     return;
   }
   if (!mediaUrl.value) {
-    alert("Por favor, ingresa una URL de imagen antes de programar.");
+    toast.warn("Por favor, ingresa una URL de imagen antes de programar.");
+    // alert("Por favor, ingresa una URL de imagen antes de programar.");
     return;
   }
   if (!token.value) {
-    alert("Token de autenticación no encontrado.");
+    toast.error("Token de autenticación no encontrado.");
+    // alert("Token de autenticación no encontrado.");
     return;
   }
 
@@ -171,10 +195,14 @@ const confirmSchedule = async () => {
     const postResponse = await createPost(token.value, postData);
 
     if (!postResponse?.success || !postResponse?.data?.id) {
-      alert(
+      toast.error(
         "Error al crear el post: " +
           (postResponse?.message || "Error desconocido"),
       );
+      // alert(
+      //   "Error al crear el post: " +
+      //     (postResponse?.message || "Error desconocido"),
+      // );
       return;
     }
 
@@ -192,19 +220,25 @@ const confirmSchedule = async () => {
       scheduledDate.value = new Date(selectedDate.value);
       isScheduling.value = false;
       selectedDate.value = new Date();
-      alert("Publicación programada para: " + formattedDate.value);
+      toast.success("Publicación programada para: " + formattedDate.value);
+      // alert("Publicación programada para: " + formattedDate.value);
       // Limpiar los campos después de programar
       description.value = "";
       contentStore.setMediaUrl(null);
     } else {
-      alert(
+      toast.error(
         "Error al programar la publicación: " +
           (jobResponse?.message || "Error desconocido"),
       );
+      // alert(
+      //   "Error al programar la publicación: " +
+      //     (jobResponse?.message || "Error desconocido"),
+      // );
     }
   } catch (error) {
+    toast.error("Error de conexión al programar publicación.");
     console.error("Error:", error);
-    alert("Error de conexión al programar publicación");
+    // alert("Error de conexión al programar publicación");
   } finally {
     isProcessing.value = false;
   }

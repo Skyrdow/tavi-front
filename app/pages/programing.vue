@@ -5,6 +5,7 @@ import { useAuth } from "~/composables/useAuth";
 import JobCard from "~/components/JobCard.vue";
 import { Calendar, DatePicker } from "v-calendar";
 import "v-calendar/style.css";
+import { toast } from "vue3-toastify";
 
 definePageMeta({
   middleware: "auth",
@@ -59,8 +60,10 @@ const loadJobs = async () => {
         data: job.data,
       };
     });
+    toast.success("Jobs cargados correctamente.");
     console.log("Jobs loaded:", jobs.value);
   } catch (error) {
+    toast.error("Error al cargar los jobs.");
     console.error("Error loading jobs:", error);
   }
 };
@@ -110,10 +113,12 @@ const confirmEdit = async () => {
     isEditing.value = false;
     selectedJob.value = null;
     loadJobs();
+    toast.success("Job actualizado correctamente.");
   } catch (error: any) {
+    toast.error("Error al editar el job: " + (error.data?.message || error.message || 'Error desconocido'));
     console.error('Error updating job:', error);
-    const message = error.response?.data?.message || error.message || 'Error desconocido';
-    alert('Error al editar el job: ' + message);
+    const message = error.data?.message || error.message || 'Error desconocido';
+    // alert('Error al editar el job: ' + message);
   }
 };
 
@@ -124,10 +129,12 @@ const deleteSelectedJob = async () => {
     await deleteJob(token.value, selectedJob.value);
     selectedJob.value = null;
     loadJobs();
+    toast.success("Job eliminado correctamente.");
   } catch (error: any) {
+    toast.error("Error al eliminar el job: " + (error.data?.message || error.message || 'Error desconocido'));
     console.error('Error deleting job:', error);
-    const message = error.response?.data?.message || error.message || 'Error desconocido';
-    alert('Error al eliminar el job: ' + message);
+    const message = error.data?.message || error.message || 'Error desconocido';
+    // alert('Error al eliminar el job: ' + message);
   }
 };
 
