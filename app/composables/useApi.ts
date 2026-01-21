@@ -118,6 +118,27 @@ export const useApi = () => {
     });
   };
 
+  const updateJob = async (token: string, jobId: string, scheduledAt: string) => {
+    return await $fetch(`/api/v1/jobs/${jobId}`, {
+      baseURL: API_BASE_URL,
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      body: { scheduledAt },
+    });
+  };
+
+  const deleteJob = async (token: string, jobId: string) => {
+    return await $fetch(`/api/v1/jobs/${jobId}`, {
+      baseURL: API_BASE_URL,
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
+  };
+
   const generateDescription = async (tenantId: string, imageUrl: string) => {
     return await $fetch("/api/v1/generate-description", {
       baseURL: API_BASE_URL,
@@ -154,6 +175,8 @@ export const useApi = () => {
     geminiRequest,
     scheduleJob,
     getJobsByTenantId,
+    updateJob,
+    deleteJob,
     generateDescription,
     createPost,
   };

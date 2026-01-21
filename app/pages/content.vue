@@ -38,6 +38,7 @@ const scheduledDate = computed({
   set: (value) => (contentStore.scheduledDate = value),
 });
 const isScheduling = ref(false);
+const isProcessing = ref(false);
 // const selectedDate = ref("");
 
 const handleUrlChanged = (url: string | null) => {
@@ -72,6 +73,7 @@ const generateAIDescription = async () => {
 };
 
 const publishNow = async () => {
+  if (isProcessing.value) return;
   if (!mediaUrl.value) {
     alert("Por favor, ingresa una URL de imagen antes de publicar.");
     return;
@@ -85,6 +87,7 @@ const publishNow = async () => {
     return;
   }
 
+  isProcessing.value = true;
   try {
     // 1. Crear el post
     const postData = {
@@ -103,7 +106,8 @@ const publishNow = async () => {
       return;
     }
 
-    // 2. Programar el job para publicar inmediatamente (hora actual)
+    // 2. Publicar inmediatamente (sin job)
+    // Aquí iría la lógica de publicar directamente, pero como no tenemos endpoint, por ahora usar job inmediato y asumir se ejecuta
     const scheduledAt = new Date().toISOString();
 
     const jobResponse = await scheduleJob(
@@ -127,6 +131,8 @@ const publishNow = async () => {
   } catch (error) {
     console.error("Error:", error);
     alert("Error de conexión al publicar");
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -135,6 +141,7 @@ const startScheduling = () => {
 };
 
 const confirmSchedule = async () => {
+  if (isProcessing.value) return;
   if (!selectedDate.value) {
     alert("Por favor, selecciona una fecha y hora.");
     return;
@@ -152,6 +159,7 @@ const confirmSchedule = async () => {
     return;
   }
 
+  isProcessing.value = true;
   try {
     // 1. Crear el post
     const postData = {
@@ -197,6 +205,8 @@ const confirmSchedule = async () => {
   } catch (error) {
     console.error("Error:", error);
     alert("Error de conexión al programar publicación");
+  } finally {
+    isProcessing.value = false;
   }
 };
 
@@ -248,7 +258,14 @@ const formattedDate = computed(() => {
             placeholder="Escribe la descripción de tu publicación..."
             class="w-full p-4 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 resize-none"
             rows="6"
+            maxlength="2200"
           />
+          <p
+            class="text-sm mt-2"
+            :class="description.length > 2000 ? 'text-red-600' : 'text-gray-600'"
+          >
+            {{ description.length }}/2200 caracteres
+          </p>
         </div>
 
         <!-- Chat con LLM para modificaciones -->
@@ -307,13 +324,15 @@ const formattedDate = computed(() => {
       <div class="flex gap-4">
         <button
           @click="publishNow"
-          class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+          :disabled="isProcessing"
+          class="px-6 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400"
         >
           Publicar Ahora
         </button>
         <button
           @click="startScheduling"
-          class="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors"
+          :disabled="isProcessing"
+          class="px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors disabled:bg-gray-400"
         >
           Programar Publicación
         </button>
@@ -369,7 +388,7 @@ const formattedDate = computed(() => {
           <div class="flex gap-2 mt-4">
             <button
               @click="confirmSchedule"
-              :disabled="!selectedDate"
+              :disabled="!selectedDate || isProcessing"
               class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors disabled:bg-gray-400"
             >
               Confirmar

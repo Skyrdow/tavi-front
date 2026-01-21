@@ -3,13 +3,19 @@ import { ref, computed, onMounted, watch } from "vue";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
 import JobCard from "~/components/JobCard.vue";
+import { Calendar, DatePicker } from "v-calendar";
+import "v-calendar/style.css";
 
 definePageMeta({
   middleware: "auth",
 });
 
-const { getJobsByTenantId } = useApi();
+const { getJobsByTenantId, updateJob, deleteJob } = useApi();
 const { token } = useAuth();
+
+const disabledDates = ref([
+  { end: new Date(Date.now() - 24 * 60 * 60 * 1000), start: null },
+]);
 
 const now = new Date();
 const currentMonth = ref(now.getMonth());
@@ -27,6 +33,9 @@ interface Job {
 }
 
 const jobs = ref<Job[]>([]);
+const selectedJob = ref<string | null>(null);
+const isEditing = ref(false);
+const newScheduledAt = ref(new Date());
 
 const loadJobs = async () => {
   try {
@@ -81,6 +90,46 @@ onMounted(() => {
 watch(token, (newToken) => {
   if (newToken) loadJobs();
 });
+
+const selectJob = (jobId: string) => {
+  selectedJob.value = selectedJob.value === jobId ? null : jobId;
+};
+
+const editSelectedJob = () => {
+  if (!selectedJob.value) return;
+  const job = jobs.value.find(j => j.id === selectedJob.value);
+  if (!job) return;
+  newScheduledAt.value = new Date(job.date + 'T' + job.time);
+  isEditing.value = true;
+};
+
+const confirmEdit = async () => {
+  if (!token.value || !selectedJob.value) return;
+  try {
+    await updateJob(token.value, selectedJob.value, newScheduledAt.value.toISOString());
+    isEditing.value = false;
+    selectedJob.value = null;
+    loadJobs();
+  } catch (error: any) {
+    console.error('Error updating job:', error);
+    const message = error.response?.data?.message || error.message || 'Error desconocido';
+    alert('Error al editar el job: ' + message);
+  }
+};
+
+const deleteSelectedJob = async () => {
+  if (!token.value || !selectedJob.value) return;
+  if (!confirm('¿Eliminar el job seleccionado?')) return;
+  try {
+    await deleteJob(token.value, selectedJob.value);
+    selectedJob.value = null;
+    loadJobs();
+  } catch (error: any) {
+    console.error('Error deleting job:', error);
+    const message = error.response?.data?.message || error.message || 'Error desconocido';
+    alert('Error al eliminar el job: ' + message);
+  }
+};
 
 const calendarDays = computed(() => {
   const date = new Date(currentYear.value, currentMonth.value, 1);
@@ -181,8 +230,70 @@ const monthName = computed(() => {
                v-for="job in day.jobs"
                :key="job.id"
                :job="job"
+               :selected-job="selectedJob"
+               @select-job="selectJob"
              />
            </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div v-if="selectedJob" class="flex gap-4 mt-6 justify-center">
+        <button
+          @click="editSelectedJob"
+          class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          Editar Fecha
+        </button>
+        <button
+          @click="deleteSelectedJob"
+          class="px-4 py-2 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Eliminar Job
+        </button>
+      </div>
+
+      <!-- Edit Modal -->
+      <div
+        v-if="isEditing"
+        class="fixed inset-0 bg-white bg-opacity-20 flex items-center justify-center z-50"
+        @click="isEditing = false"
+      >
+        <div
+          class="bg-white p-6 rounded-xl shadow-lg border border-gray-100 max-w-md w-full mx-4 relative"
+          @click.stop
+        >
+          <button
+            @click="isEditing = false"
+            class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+          <h3 class="font-bold text-lg mb-4 text-gray-800 pr-8">
+            Editar fecha de publicación
+          </h3>
+          <DatePicker
+            v-model="newScheduledAt"
+            mode="dateTime"
+            is24hr
+            :disabled-dates="disabledDates"
+          />
+          <div class="flex gap-2 mt-4">
+            <button
+              @click="confirmEdit"
+              class="flex-1 px-4 py-2 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
+            >
+              Confirmar
+            </button>
+            <button
+              @click="isEditing = false"
+              class="flex-1 px-4 py-2 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
         </div>
       </div>
     </div>
