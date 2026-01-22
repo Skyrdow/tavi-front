@@ -92,7 +92,9 @@ const sendMessage = async () => {
     class="flex flex-col w-full bg-white rounded-xl shadow-lg border border-gray-100 h-full max-h-[500px]"
   >
     <!-- Chat Header -->
-    <div class="p-4 border-b bg-indigo-50 rounded-t-xl flex justify-between items-center">
+    <div
+      class="p-4 border-b bg-indigo-50 rounded-t-xl flex justify-between items-center"
+    >
       <h3 class="font-bold text-lg text-indigo-800 flex items-center gap-2">
         <img class="size-5" src="/assets/gemini.svg" alt="AI Icon" />
         Asistente IA para Descripción

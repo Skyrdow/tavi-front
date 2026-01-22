@@ -8,8 +8,8 @@ import "v-calendar/style.css";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
 import { useContentStore } from "~/stores/content";
-import { toast } from 'vue3-toastify';
-import 'vue3-toastify/dist/index.css';
+import { toast } from "vue3-toastify";
+import "vue3-toastify/dist/index.css";
 
 definePageMeta({
   middleware: "auth",
@@ -101,7 +101,7 @@ const publishNow = async () => {
   try {
     // 1. Crear el post
     const postData = {
-      title:"Title "+Date.now(),
+      title: "Title " + Date.now(),
       content: description.value.trim(),
       imageURL: mediaUrl.value,
     };
@@ -187,7 +187,7 @@ const confirmSchedule = async () => {
   try {
     // 1. Crear el post
     const postData = {
-      title:"Title "+Date.now(),
+      title: "Title " + Date.now(),
       content: description.value.trim(),
       imageURL: mediaUrl.value,
     };
@@ -296,7 +296,9 @@ const formattedDate = computed(() => {
           />
           <p
             class="text-sm mt-2"
-            :class="description.length > 2000 ? 'text-red-600' : 'text-gray-600'"
+            :class="
+              description.length > 2000 ? 'text-red-600' : 'text-gray-600'
+            "
           >
             {{ description.length }}/2200 caracteres
           </p>

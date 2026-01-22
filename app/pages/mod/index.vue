@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, onMounted, watch } from "vue";
 import { useApi } from "~/composables/useApi";
 import { useAuth } from "~/composables/useAuth";
 
@@ -33,6 +33,7 @@ const fetchComments = async () => {
         (a, b) =>
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
       );
+      console.log(comments.value);
     } else {
       error.value = response.message || "Error al cargar comentarios";
     }
@@ -55,53 +56,52 @@ const formatDate = (dateString: string) => {
 };
 
 onMounted(() => {
-  fetchComments();
+  if (tenantId.value) {
+    fetchComments();
+  }
+});
+
+watch(tenantId, (newVal) => {
+  if (newVal && comments.value.length === 0) {
+    fetchComments();
+  }
 });
 </script>
 
 <template>
-  <div class="grid grid-cols-3 gap-6 min-h-[80vh]">
-    <div
-      class="col-span-1 bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200"
-    >
-      <h2 class="text-xl font-bold p-4 border-b bg-gray-50 text-gray-800">
-        Comentarios ({{ comments.length }})
-      </h2>
-      <div v-if="loading" class="p-4 text-gray-500 text-center">
-        Cargando...
-      </div>
-      <div v-else-if="error" class="p-4 text-red-500 text-center">
-        {{ error }}
-      </div>
-      <div
-        v-else-if="comments.length === 0"
-        class="p-4 text-gray-500 text-center"
-      >
-        No hay comentarios
-      </div>
-      <div v-else class="divide-y divide-gray-100 max-h-[70vh] overflow-y-auto">
-        <div
-          v-for="comment in comments"
-          :key="comment.id"
-          class="p-4 hover:bg-gray-50 transition-colors"
-        >
-          <div class="flex justify-between text-sm text-gray-500">
-            <span class="font-semibold text-gray-700">{{
-              comment.user || comment.username
-            }}</span>
-            <span class="text-xs">{{ formatDate(comment.createdAt) }}</span>
-          </div>
-          <p class="mt-1 text-gray-800">{{ comment.comment }}</p>
-        </div>
-      </div>
+  <div
+    class="bg-white rounded-xl shadow-lg overflow-hidden border border-gray-200"
+  >
+    <h2 class="text-xl font-bold p-4 border-b bg-gray-50 text-gray-800">
+      Comentarios ({{ comments.length }})
+    </h2>
+    <div v-if="loading" class="p-4 text-gray-500 text-center">Cargando...</div>
+    <div v-else-if="error" class="p-4 text-red-500 text-center">
+      {{ error }}
     </div>
-
     <div
-      class="col-span-2 bg-white rounded-xl shadow-lg border border-gray-200 flex items-center justify-center"
+      v-else-if="comments.length === 0"
+      class="p-4 text-gray-500 text-center"
     >
-      <p class="text-lg text-gray-500">
-        Selecciona un comentario para ver detalles.
-      </p>
+      No hay comentarios
+    </div>
+    <div v-else class="divide-y divide-gray-100 max-h-[80vh] overflow-y-auto">
+      <div
+        v-for="comment in comments"
+        :key="comment.id"
+        class="p-4 hover:bg-gray-50 transition-colors"
+      >
+        <div class="flex justify-between text-sm text-gray-500">
+          <span class="font-semibold text-gray-700">{{
+            comment.user || comment.username
+          }}</span>
+          <span class="text-xs">{{ formatDate(comment.createdAt) }}</span>
+        </div>
+        <p class="mt-1 text-gray-800">{{ comment.comment }}</p>
+        <p v-if="comment.responseTo" class="mt-1 text-sm text-gray-600">
+          Respuesta a: {{ comment.responseTo }}
+        </p>
+      </div>
     </div>
   </div>
 </template>

@@ -118,7 +118,11 @@ export const useApi = () => {
     });
   };
 
-  const updateJob = async (token: string, jobId: string, scheduledAt: string) => {
+  const updateJob = async (
+    token: string,
+    jobId: string,
+    scheduledAt: string,
+  ) => {
     return await $fetch(`/api/v1/jobs/${jobId}`, {
       baseURL: API_BASE_URL,
       method: "PUT",

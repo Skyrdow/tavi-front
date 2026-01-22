@@ -49,7 +49,7 @@ const loadJobs = async () => {
     console.log("Jobs response:", response);
     jobs.value = response.data.map((job: any) => {
       const scheduledAt = new Date(job.scheduledAt);
-      const date = scheduledAt.toISOString().split('T')[0];
+      const date = scheduledAt.toISOString().split("T")[0];
       const time = scheduledAt.toTimeString().slice(0, 5);
       return {
         id: job.id,
@@ -100,40 +100,50 @@ const selectJob = (jobId: string) => {
 
 const editSelectedJob = () => {
   if (!selectedJob.value) return;
-  const job = jobs.value.find(j => j.id === selectedJob.value);
+  const job = jobs.value.find((j) => j.id === selectedJob.value);
   if (!job) return;
-  newScheduledAt.value = new Date(job.date + 'T' + job.time);
+  newScheduledAt.value = new Date(job.date + "T" + job.time);
   isEditing.value = true;
 };
 
 const confirmEdit = async () => {
   if (!token.value || !selectedJob.value) return;
   try {
-    await updateJob(token.value, selectedJob.value, newScheduledAt.value.toISOString());
+    await updateJob(
+      token.value,
+      selectedJob.value,
+      newScheduledAt.value.toISOString(),
+    );
     isEditing.value = false;
     selectedJob.value = null;
     loadJobs();
     toast.success("Job actualizado correctamente.");
   } catch (error: any) {
-    toast.error("Error al editar el job: " + (error.data?.message || error.message || 'Error desconocido'));
-    console.error('Error updating job:', error);
-    const message = error.data?.message || error.message || 'Error desconocido';
+    toast.error(
+      "Error al editar el job: " +
+        (error.data?.message || error.message || "Error desconocido"),
+    );
+    console.error("Error updating job:", error);
+    const message = error.data?.message || error.message || "Error desconocido";
     // alert('Error al editar el job: ' + message);
   }
 };
 
 const deleteSelectedJob = async () => {
   if (!token.value || !selectedJob.value) return;
-  if (!confirm('¿Eliminar el job seleccionado?')) return;
+  if (!confirm("¿Eliminar el job seleccionado?")) return;
   try {
     await deleteJob(token.value, selectedJob.value);
     selectedJob.value = null;
     loadJobs();
     toast.success("Job eliminado correctamente.");
   } catch (error: any) {
-    toast.error("Error al eliminar el job: " + (error.data?.message || error.message || 'Error desconocido'));
-    console.error('Error deleting job:', error);
-    const message = error.data?.message || error.message || 'Error desconocido';
+    toast.error(
+      "Error al eliminar el job: " +
+        (error.data?.message || error.message || "Error desconocido"),
+    );
+    console.error("Error deleting job:", error);
+    const message = error.data?.message || error.message || "Error desconocido";
     // alert('Error al eliminar el job: ' + message);
   }
 };
@@ -181,9 +191,7 @@ const monthName = computed(() => {
 
 <template>
   <div class="p-8 bg-gray-50 min-h-screen">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">
-      Programación de Jobs
-    </h1>
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Programación de Jobs</h1>
 
     <!-- Calendar Header -->
     <div
@@ -232,15 +240,15 @@ const monthName = computed(() => {
             :class="{ 'text-indigo-600': day.dateString === '2025-11-10' }"
             >{{ day.day }}</span
           >
-           <div class="grow space-y-1 overflow-y-auto">
-             <JobCard
-               v-for="job in day.jobs"
-               :key="job.id"
-               :job="job"
-               :selected-job="selectedJob"
-               @select-job="selectJob"
-             />
-           </div>
+          <div class="grow space-y-1 overflow-y-auto">
+            <JobCard
+              v-for="job in day.jobs"
+              :key="job.id"
+              :job="job"
+              :selected-job="selectedJob"
+              @select-job="selectJob"
+            />
+          </div>
         </div>
       </div>
 
@@ -274,8 +282,18 @@ const monthName = computed(() => {
             @click="isEditing = false"
             class="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
           >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            <svg
+              class="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M6 18L18 6M6 6l12 12"
+              />
             </svg>
           </button>
           <h3 class="font-bold text-lg mb-4 text-gray-800 pr-8">
